@@ -6,6 +6,14 @@ authors = ["Crabbit Contributors"]
 description = "A grumpy wee guardian that bridges WireGuard and Plan 9"
 license = "MIT"
 
+[lib]
+name = "crabbit"
+path = "src/lib.rs"
+
+[[bin]]
+name = "crabbit"
+path = "src/main.rs"
+
 [dependencies]
 # Async runtime
 tokio = { version = "1.36", features = ["full"] }
