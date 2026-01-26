@@ -1,0 +1,42 @@
+# Test configuration for WireGuard party connection
+# This is a minimal config to test connecting to an existing WireGuard peer
+
+[listen]
+# 9P server address (not used in this test, but required)
+address = "127.0.0.1:5640"
+
+[wireguard]
+# Generate with: wg genkey
+# Or set via CRABBIT_PRIVATE_KEY environment variable
+private_key = "PASTE_YOUR_PRIVATE_KEY_HERE"
+
+# Port to listen for WireGuard traffic
+listen_port = 51821
+
+# Your address on the WireGuard network
+# This should be an IP in your WireGuard subnet
+address = "10.0.0.2"
+
+# Define the peer you want to connect to
+[[wireguard.peers]]
+name = "test-peer"
+# The peer's public key (from their wg show or config)
+public_key = "PASTE_PEER_PUBLIC_KEY_HERE"
+# The peer's endpoint (IP:port)
+endpoint = "PEER_IP_ADDRESS:51820"
+# What IPs this peer is allowed to send/receive
+allowed_ips = ["10.0.0.1/32"]
+# Send keepalive every 25 seconds
+persistent_keepalive = 25
+
+[dns]
+servers = ["8.8.8.8"]
+
+[auth]
+mode = "standalone"
+authid = "test"
+authdom = "test"
+
+[[auth.users]]
+name = "test"
+key = "0123456789abcdef"
