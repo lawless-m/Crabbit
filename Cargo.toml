@@ -1,0 +1,54 @@
+[package]
+name = "crabbit"
+version = "0.1.0"
+edition = "2021"
+authors = ["Crabbit Contributors"]
+description = "A grumpy wee guardian that bridges WireGuard and Plan 9"
+license = "MIT"
+
+[dependencies]
+# Async runtime
+tokio = { version = "1.36", features = ["full"] }
+
+# 9P protocol
+# We'll use a simple 9p implementation or build our own
+bytes = "1.5"
+
+# WireGuard
+boringtun = "0.6"
+
+# Networking
+socket2 = "0.5"
+
+# Configuration
+toml = "0.8"
+serde = { version = "1.0", features = ["derive"] }
+
+# Cryptography for auth
+des = "0.8"
+rand = "0.8"
+getrandom = "0.2"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Base64 for keys
+base64 = "0.21"
+
+# IP address parsing
+ipnet = "2.9"
+
+[dev-dependencies]
+# Testing utilities
+tokio-test = "0.4"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
