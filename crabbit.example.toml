@@ -1,0 +1,82 @@
+# Crabbit configuration example
+# Copy this file to /etc/crabbit.toml and customize
+
+[listen]
+# Where to listen for 9P connections
+# Can be TCP address or Unix socket
+address = "0.0.0.0:564"
+# Or Unix socket: address = "/tmp/crabbit.sock"
+
+[wireguard]
+# Your WireGuard private key (base64, from wg genkey)
+# You can also set this via CRABBIT_PRIVATE_KEY environment variable
+private_key = "PRIVATE_KEY_HERE"
+
+# Port to listen for WireGuard traffic
+listen_port = 51820
+
+# Your address on the WireGuard network (CIDR notation)
+address = "10.0.0.5/24"
+
+# Define your WireGuard peers
+[[wireguard.peers]]
+name = "homeserver"
+public_key = "PEER_PUBLIC_KEY_HERE"
+endpoint = "home.example.com:51820"
+allowed_ips = ["10.0.0.1/32"]
+persistent_keepalive = 25
+
+[[wireguard.peers]]
+name = "vps"
+public_key = "ANOTHER_PUBLIC_KEY"
+endpoint = "vps.example.com:51820"
+allowed_ips = ["10.0.0.2/32"]
+persistent_keepalive = 25
+
+[[wireguard.peers]]
+name = "laptop"
+public_key = "LAPTOP_PUBLIC_KEY"
+# No endpoint - this peer connects to us
+allowed_ips = ["10.0.0.3/32"]
+
+[dns]
+# Upstream DNS servers (reached via WireGuard tunnel)
+servers = ["1.1.1.1", "8.8.8.8"]
+
+# Cache TTL in seconds (optional, default: 300)
+cache_ttl = 300
+
+# Optional: hosts table for mesh peer names
+[dns.hosts]
+homeserver = "10.0.0.1"
+vps = "10.0.0.2"
+laptop = "10.0.0.3"
+
+[auth]
+# Authentication mode: "standalone" or "authserver"
+mode = "standalone"
+
+# Auth identity and domain
+authid = "crabbit"
+authdom = "crabbit"
+
+# For authserver mode only:
+# server = "10.0.0.1!567"
+
+# Users for standalone mode
+# Keys are 7-byte DES keys as hex (14 hex characters)
+# Use Plan 9's auth/wrkey or a passtokey tool to generate
+[[auth.users]]
+name = "glenda"
+key = "0123456789abcdef"  # Replace with actual key
+
+[[auth.users]]
+name = "alice"
+key = "fedcba9876543210"  # Replace with actual key
+
+[logging]
+# Log level: error, warn, info, debug, trace
+level = "info"
+
+# Optional: log to file instead of stderr
+# file = "/var/log/crabbit.log"
