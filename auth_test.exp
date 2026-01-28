@@ -1,0 +1,40 @@
+#!/usr/bin/expect -f
+set timeout 2
+log_user 1
+
+spawn nc localhost 12345
+
+send "auth/debug\r"
+
+# For each protocol, wait for password prompt then respond
+expect {
+    "password for glenda" {
+        send "test1234\r"
+        exp_continue
+    }
+    "cpu server owner" {
+        send "\r"
+        exp_continue
+    }
+    "botch" {
+	 puts "PROTOCOL BOTCH"
+         exp_continue
+    }
+    "_asgetticket failed" {
+        puts ">>> TICKET REQUEST FAILED <<<"
+    }
+    "cannot decrypt" {
+        puts ">>> DECRYPTION FAILED <<<"
+    }
+    "succeeded" {
+        puts ">>> SUCCESS <<<"
+        exp_continue
+    }
+    "%" {
+      puts "END"
+    }
+    eof {
+        puts ">>> EOF <<<"
+    }
+  
+}

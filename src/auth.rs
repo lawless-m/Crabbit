@@ -9,6 +9,7 @@ use std::collections::HashMap;
 
 use crate::config::{AuthConfig, AuthMode};
 use crate::des9::{plan9_encrypt, plan9_decrypt};
+use crate::authpak::{authpak_hash, PAKHASHLEN};
 #[cfg(test)]
 use crate::des9::des56to64;
 
@@ -28,11 +29,12 @@ pub const AUTH_TC: u8 = 65;    // Client ticket
 pub const AUTH_AS: u8 = 66;    // Server authenticator
 pub const AUTH_AC: u8 = 67;    // Client authenticator
 
-/// User credentials for p9sk1 authentication
+/// User credentials for p9sk1 and dp9ik authentication
 #[derive(Clone)]
 pub struct UserCredentials {
     pub username: String,
-    pub des_key: [u8; DESSION],  // 7-byte DES key
+    pub des_key: [u8; DESSION],      // 7-byte DES key for p9sk1
+    pub pak_hash: [u8; PAKHASHLEN],  // 448-byte PAK hash for dp9ik
 }
 
 /// The authentication module handles p9sk1 auth
@@ -61,11 +63,20 @@ impl AuthModule {
                     key
                 };
 
+                // Compute PAK hash for dp9ik
+                let pak_hash = if let Some(ref password) = user.password {
+                    authpak_hash(password, &user.name)
+                } else {
+                    // No password, can't compute pakhash - use zeros (dp9ik won't work)
+                    [0u8; PAKHASHLEN]
+                };
+
                 users.insert(
                     user.name.clone(),
                     UserCredentials {
                         username: user.name.clone(),
                         des_key,
+                        pak_hash,
                     },
                 );
             }
