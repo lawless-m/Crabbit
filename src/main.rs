@@ -1,9 +1,4 @@
-mod auth;
-mod config;
-mod net_engine;
-mod ninep;
-mod wireguard;
-
+use crabbit::{auth, config, net_engine, ninep, wireguard};
 use anyhow::Result;
 use std::path::PathBuf;
 use tracing::info;

@@ -71,7 +71,10 @@ pub enum AuthMode {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct UserConfig {
     pub name: String,
-    pub key: String, // 7-byte DES key as hex (14 hex chars)
+    #[serde(default)]
+    pub key: String, // 7-byte DES key as hex (14 hex chars), optional if password provided
+    #[serde(default)]
+    pub password: Option<String>, // Password to derive key from (preferred)
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, Default)]
@@ -141,18 +144,27 @@ impl Config {
                 if self.auth.users.is_empty() {
                     anyhow::bail!("Standalone auth mode requires at least one user");
                 }
-                // Validate user keys
+                // Validate user credentials - must have either password or key
                 for user in &self.auth.users {
-                    if user.key.len() != 14 {
+                    if user.password.is_none() && user.key.is_empty() {
                         anyhow::bail!(
-                            "User {} key must be 14 hex characters (7 bytes)",
+                            "User {} must have either password or key",
                             user.name
                         );
                     }
-                    // Verify it's valid hex
-                    hex::decode(&user.key).with_context(|| {
-                        format!("User {} key is not valid hex", user.name)
-                    })?;
+                    // If key is provided, validate it
+                    if !user.key.is_empty() {
+                        if user.key.len() != 14 {
+                            anyhow::bail!(
+                                "User {} key must be 14 hex characters (7 bytes)",
+                                user.name
+                            );
+                        }
+                        // Verify it's valid hex
+                        hex::decode(&user.key).with_context(|| {
+                            format!("User {} key is not valid hex", user.name)
+                        })?;
+                    }
                 }
             }
             AuthMode::AuthServer => {
