@@ -103,6 +103,21 @@ impl AuthModule {
         self.users.get(username)
     }
 
+    /// Add or update a user
+    pub fn add_user(&mut self, creds: UserCredentials) {
+        self.users.insert(creds.username.clone(), creds);
+    }
+
+    /// Remove a user
+    pub fn remove_user(&mut self, username: &str) -> bool {
+        self.users.remove(username).is_some()
+    }
+
+    /// Get all users (for iteration)
+    pub fn users(&self) -> &HashMap<String, UserCredentials> {
+        &self.users
+    }
+
     /// Generate a random challenge
     pub fn generate_challenge() -> [u8; CHALLEN] {
         let mut challenge = [0u8; CHALLEN];
@@ -300,8 +315,9 @@ pub fn pass_to_key(password: &str) -> [u8; DESSION] {
     loop {
         // Extract 7-byte key using Plan 9's bit-shift algorithm
         // key[i] = (t[i] >> i) + (t[i+1] << (8 - (i+1)))
+        // NOTE: 9front uses + not | - they differ when bits overlap!
         for i in 0..DESSION {
-            key[i] = (t[i] >> i) | (t[i + 1] << (7 - i));
+            key[i] = (t[i] >> i).wrapping_add(t[i + 1] << (7 - i));
         }
 
         if remaining <= 8 {

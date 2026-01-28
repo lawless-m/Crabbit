@@ -5,6 +5,7 @@ pub mod authpak;
 pub mod des9;
 pub mod auth_server;
 pub mod config;
+pub mod keys;
 pub mod net_engine;
 pub mod ninep;
 pub mod wireguard;
