@@ -1,6 +1,7 @@
 // Crabbit library - expose modules for testing and reuse
 
 pub mod auth;
+pub mod auth_client;
 pub mod authpak;
 pub mod des9;
 pub mod auth_server;

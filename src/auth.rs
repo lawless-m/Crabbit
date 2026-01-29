@@ -24,6 +24,7 @@ pub const TICKETLEN: usize = 72;   // type[1] + chal[8] + cuid[28] + suid[28] + 
 pub const AUTH_TREQ: u8 = 1;   // Ticket request
 pub const AUTH_OK: u8 = 4;     // Success
 pub const AUTH_ERR: u8 = 5;    // Error
+pub const AUTH_PAK: u8 = 19;   // dp9ik PAK exchange
 pub const AUTH_TS: u8 = 64;    // Server ticket
 pub const AUTH_TC: u8 = 65;    // Client ticket
 pub const AUTH_AS: u8 = 66;    // Server authenticator
@@ -41,6 +42,8 @@ pub struct UserCredentials {
 pub struct AuthModule {
     config: AuthConfig,
     users: HashMap<String, UserCredentials>,
+    /// External auth server address (for AuthServer mode)
+    external_server: Option<String>,
 }
 
 impl AuthModule {
@@ -82,10 +85,27 @@ impl AuthModule {
             }
         }
 
+        let external_server = if config.mode == AuthMode::AuthServer {
+            config.server.clone()
+        } else {
+            None
+        };
+
         Ok(AuthModule {
             config: config.clone(),
             users,
+            external_server,
         })
+    }
+
+    /// Check if running in standalone mode (local auth)
+    pub fn is_standalone(&self) -> bool {
+        self.config.mode == AuthMode::Standalone
+    }
+
+    /// Get the external auth server address (for forwarding mode)
+    pub fn server_addr(&self) -> Option<&str> {
+        self.external_server.as_deref()
     }
 
     /// Get the auth domain
